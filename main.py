@@ -1,47 +1,60 @@
 import discord
-import os
+import os, sys
 from dotenv import load_dotenv
-import socket
-import nmap
 import setproctitle
+import subprocess
+import socket
+from discord.ext import commands, tasks
+from discord.ext.commands import bot
 
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 
-bot = discord.Client()
+bot = commands.Bot(command_prefix='.')
 setproctitle.setproctitle("pingbot") # <-- setting the process name
 
+channel = bot.get_channel(790955067414151188)
+serverOpen=True
+path = os.path.dirname(sys.argv[0])
 
 
 
-""" async def my_background_task():
-    await client.wait_until_ready()
-    channel = client.get_channel(792726813600251914)
-    status='True'
-    while True:
-        with open('ip.txt') as f:
-            hostname = f.readline()
+
+@tasks.loop(minutes=1)
+async def change_status():
+    await bot.wait_until_ready()
+    channel = bot.get_channel(790955067414151188)
+    global serverOpen
+
+    with open(path+'network.txt') as f:
+        host = f.readline().rstrip()
+        if host.upper().isupper():
+            host=socket.gethostbyname(host)
+        port = f.readline()
         
-        response = os.system("ping -c 1 " + hostname)
-
-        if response == 0 and status=='False': #Server becomes accesible
-            status = "True"
-            
-        if response == 0 and status=='True': # Server keeps accessible
-            break
-
-        if response==1 and status=='True': # Server becomes inaccesible
-            status = "False"
-
-        if response==1 and status=='True': # Server still inaccessible
-            break
-
-        await channel.send('uwu')
-        await asyncio.sleep(2) # task runs every 60 seconds
+    result = subprocess.check_output("nmap -p "+ port+" " +host, shell=True)
 
 
- """
+    if 'open' in str(result) and not serverOpen: #Server becomes accesible
+        serverOpen = True
+        await channel.send("El server está abierto")
+        
+        
+    if 'open' in str(result)  and serverOpen: # Server keeps accessible
+        pass
+
+    if 'closed' in str(result)  and serverOpen: # Server becomes inaccesible
+        serverOpen = False
+        await channel.send("El server no está operativo")
+
+    if 'closed' in str(result) and not serverOpen: # Server still inaccessible
+        pass
+
+
+
+
+
 
 
 
@@ -50,6 +63,11 @@ setproctitle.setproctitle("pingbot") # <-- setting the process name
 @bot.event
 async def on_ready():
     print(f'{bot.user} has connected to Discord!')
+    serverOpen=True
+    change_status.start()
+
+
+
 
 
 
@@ -62,9 +80,10 @@ async def on_message(message):
                 host=socket.gethostbyname(host)
             port = f.readline()
 
-        nm = nmap.PortScanner()
-        nm.scan(host, port)
-        result =nm[host]['tcp'][int(port)]['state']
+
+        
+        result = subprocess.check_output("nmap -p 46570 firewolfnetwork.com", shell=True)
+        print(result)
 
         if 'open' in str(result) :
             status = "El server está abierto"
@@ -73,8 +92,9 @@ async def on_message(message):
 
         await message.channel.send(status)
 
+   
 
-
+""" bot.loop.create_task(my_background_task()) """
 bot.run(TOKEN)
 
 
