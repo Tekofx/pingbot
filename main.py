@@ -3,12 +3,14 @@ import os
 from dotenv import load_dotenv
 import socket
 import nmap
+import setproctitle
 
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 
 bot = discord.Client()
+setproctitle.setproctitle("pingbot") # <-- setting the process name
 
 
 
