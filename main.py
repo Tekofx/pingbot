@@ -6,25 +6,27 @@ import subprocess
 import socket
 from discord.ext import commands, tasks
 from discord.ext.commands import bot
+import logging
 
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
+CHANNELID=os.getenv('CHANNEL')
 
 bot = commands.Bot(command_prefix='.')
 setproctitle.setproctitle("pingbot") # <-- setting the process name
 
-channel = bot.get_channel(790955067414151188)
+global channel
 serverOpen=True
 path = os.path.dirname(sys.argv[0])
 
 
 
 
-@tasks.loop(minutes=1)
-async def change_status():
+@tasks.loop(seconds=2)
+async def checkServerStatus():
     await bot.wait_until_ready()
-    channel = bot.get_channel(790955067414151188)
+    channel = bot.get_channel(int(CHANNELID))
     global serverOpen
 
     with open(path+'network.txt') as f:
@@ -38,6 +40,7 @@ async def change_status():
 
     if 'open' in str(result) and not serverOpen: #Server becomes accesible
         serverOpen = True
+        logging.info("El server está abierto")
         await channel.send("El server está abierto")
         
         
@@ -46,12 +49,25 @@ async def change_status():
 
     if 'closed' in str(result)  and serverOpen: # Server becomes inaccesible
         serverOpen = False
+        logging.info("El server no está operativo")
+
         await channel.send("El server no está operativo")
+
 
     if 'closed' in str(result) and not serverOpen: # Server still inaccessible
         pass
 
 
+
+def setupLogs():
+    os.system("rm "+path+"logs")
+    logging.basicConfig(filename="logs",
+                            filemode='a',
+                            format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+                            datefmt='%H:%M:%S',
+                            level=logging.INFO)
+
+    logging.info("Running Pingbot")
 
 
 
@@ -63,8 +79,10 @@ async def change_status():
 @bot.event
 async def on_ready():
     print(f'{bot.user} has connected to Discord!')
+    setupLogs()
+
     serverOpen=True
-    change_status.start()
+    checkServerStatus.start()
 
 
 
@@ -94,7 +112,6 @@ async def on_message(message):
 
    
 
-""" bot.loop.create_task(my_background_task()) """
 bot.run(TOKEN)
 
 
