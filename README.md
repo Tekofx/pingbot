@@ -3,10 +3,8 @@
 - A .env file with the syntax:
     ```
     DISCORD_TOKEN=""
-    CHANNEL=""
     ```
-    - Where discord_token is the token of your discord bot
-    - Where channel is the id of the channel you want the bot to send messages
+    - Where DISCORD_TOKEN is the token of your discord bot
 
 - Python packages
   - [setproctitle](https://pypi.org/project/setproctitle/)
