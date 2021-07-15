@@ -61,7 +61,7 @@ async def on_message(message):
         tmp = await message.channel.send('Comprobando ping...')
 
 
-        with open('network.txt') as f:
+        with open('resources/network.txt') as f:
             host = f.readline().rstrip()
             port = f.readline()
 
@@ -77,7 +77,7 @@ async def on_message(message):
             await tmp.edit(content=status)
 
             # Write to file
-            rewrite_contents_of_file("status.txt", "offline")
+            rewrite_contents_of_file("resources/status.txt", "offline")
 
             tmp2=await message.channel.send("Comprobando si se ha cambiado la ip...")
 
@@ -89,12 +89,12 @@ async def on_message(message):
             ip_address=ip_address.replace('(','')
             ip_address=ip_address.replace(')','')
 
-            if check_if_string_in_file("ip.txt",ip_address):
+            if check_if_string_in_file("resources/ip.txt",ip_address):
                 await tmp2.edit(content="La ip no ha cambiado, sigue siendo: "+ ip_address+":"+port)
 
             else:
                 await tmp2.edit(content="La nueva ip es: "+ip_address+":"+port)
-                rewrite_contents_of_file("ip.txt",ip_address)
+                rewrite_contents_of_file("resources/ip.txt",ip_address)
 
 
         else: 
@@ -105,12 +105,12 @@ async def on_message(message):
             if 'open' in str(result) :
                 status = "El server está abierto. La ip y puerto es: "+host+":"+port
                 logging.info("Server and port open")
-                rewrite_contents_of_file("status.txt", "online")
+                rewrite_contents_of_file("resources/status.txt", "online")
 
             else:
                 status = "El server no está operativo"
                 logging.info("Port closed")
-                rewrite_contents_of_file("status.txt", "offline")
+                rewrite_contents_of_file("resources/status.txt", "offline")
 
 
 
