@@ -53,7 +53,6 @@ def rewrite_contents_of_file(file_name:str,string:str):
 async def on_ready():
     print(f'{bot.user} has connected to Discord!')
     setupLogs()
-    es_viernes().start()
 
 @bot.event
 async def on_message(message):
