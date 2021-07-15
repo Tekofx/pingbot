@@ -1,4 +1,6 @@
 .env
-network.txt
 logs
 .vscode/settings.json
+resources/ip.txt
+resources/network.txt
+resources/status.txt
